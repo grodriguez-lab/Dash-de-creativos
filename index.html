@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoreo de Creativos — Retorna Growth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12151a;
+    --panel: #1a1e25;
+    --panel-2: #20242c;
+    --border: #2a3038;
+    --text: #e9ecf1;
+    --text-dim: #8b9199;
+    --amber: #ffb020;
+    --amber-dim: #7a5a1e;
+    --verde: #3ddc84;
+    --amarillo: #f5c242;
+    --naranja: #f2884b;
+    --rojo: #f2495c;
+    --gris: #6b7280;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(255,176,32,0.06), transparent 40%),
+      radial-gradient(circle at 85% 100%, rgba(61,220,132,0.05), transparent 40%);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 32px 24px 80px;
+  }
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  /* ---------- HEADER ---------- */
+  header{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    flex-wrap: wrap; gap: 16px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+  .brand-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--amber); margin-bottom: 6px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand-eyebrow .rec-dot{
+    width:7px;height:7px;border-radius:50%;background:var(--amber);
+    box-shadow:0 0 8px var(--amber);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+  h1{
+    font-family:'Space Grotesk', sans-serif; font-weight:700;
+    font-size: clamp(24px, 3.4vw, 34px);
+    letter-spacing: -0.01em;
+  }
+  .meta-right{ text-align:right; font-size:13px; color: var(--text-dim); }
+  .meta-right span{ color: var(--text); font-family:'IBM Plex Mono', monospace; }
+
+  /* ---------- SEMAFORO / STATS ---------- */
+  .board{
+    display:grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 22px;
+  }
+  @media (max-width: 760px){ .board{ grid-template-columns: repeat(2, 1fr); } }
+  .lamp-card{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .lamp-card::before{
+    content:''; position:absolute; inset:0 0 auto 0; height:3px;
+  }
+  .lamp-card.c-green::before{ background: var(--verde); }
+  .lamp-card.c-yellow::before{ background: var(--amarillo); }
+  .lamp-card.c-orange::before{ background: var(--naranja); }
+  .lamp-card.c-red::before{ background: var(--rojo); }
+  .lamp-top{ display:flex; align-items:center; gap:10px; margin-bottom: 10px; }
+  .lamp{
+    width:16px; height:16px; border-radius:50%; flex-shrink:0;
+  }
+  .c-green .lamp{ background: var(--verde); box-shadow:0 0 14px var(--verde); }
+  .c-yellow .lamp{ background: var(--amarillo); box-shadow:0 0 14px var(--amarillo); }
+  .c-orange .lamp{ background: var(--naranja); box-shadow:0 0 14px var(--naranja); }
+  .c-red .lamp{ background: var(--rojo); box-shadow:0 0 14px var(--rojo); }
+  .lamp-label{ font-size:13px; color: var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; font-weight:600;}
+  .lamp-count{ font-family:'Space Grotesk', sans-serif; font-size:38px; font-weight:700; line-height:1; }
+  .lamp-sub{ font-size:12px; color: var(--text-dim); margin-top:4px; }
+
+  /* ---------- KPI STRIP ---------- */
+  .kpi-strip{
+    display:grid; grid-template-columns: repeat(4,1fr); gap:14px; margin-bottom: 28px;
+  }
+  @media (max-width: 760px){ .kpi-strip{ grid-template-columns: repeat(2,1fr); } }
+  .kpi{
+    background: var(--panel-2); border:1px solid var(--border); border-radius:12px;
+    padding: 14px 16px;
+  }
+  .kpi-label{ font-size:11px; color: var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;}
+  .kpi-value{ font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:600; }
+
+  /* ---------- SECTION TITLES ---------- */
+  .section-title{
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:16px;
+    margin: 30px 0 14px; display:flex; align-items:center; gap:10px;
+    color: var(--text);
+  }
+  .section-title .tag{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--amber);
+    border:1px solid var(--amber-dim); padding:2px 8px; border-radius: 20px;
+  }
+
+  /* ---------- WINNERS/LOSERS ---------- */
+  .two-col{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  @media (max-width: 760px){ .two-col{ grid-template-columns: 1fr; } }
+  .list-card{
+    background: var(--panel); border:1px solid var(--border); border-radius: 14px; padding: 6px 0; overflow:hidden;
+  }
+  .list-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 11px 16px; border-bottom: 1px solid var(--border); gap: 10px;
+  }
+  .list-row:last-child{ border-bottom:none; }
+  .list-row .pid{ font-family:'IBM Plex Mono', monospace; font-size:13px; color: var(--text); }
+  .list-row .ruta-badge{
+    font-size:10px; font-weight:600; color: var(--text-dim); background: var(--panel-2);
+    border:1px solid var(--border); border-radius:6px; padding: 2px 6px; margin-left:8px;
+  }
+  .list-row .delta{ font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:600; white-space:nowrap;}
+  .delta.neg{ color: var(--verde); }
+  .delta.pos{ color: var(--rojo); }
+
+  /* ---------- FILTERS ---------- */
+  .filters{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 14px;
+  }
+  select, input[type=text]{
+    background: var(--panel-2); color: var(--text); border:1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; font-family:'Inter'; font-size:13px;
+  }
+  select:focus, input:focus{ outline: 1px solid var(--amber); }
+
+  /* ---------- TABLE ---------- */
+  .table-wrap{
+    background: var(--panel); border:1px solid var(--border); border-radius:14px;
+    overflow: auto;
+  }
+  table{ width:100%; border-collapse: collapse; min-width: 920px; }
+  thead th{
+    position: sticky; top:0; background: var(--panel-2);
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+    color: var(--text-dim); padding: 12px 14px; border-bottom:1px solid var(--border);
+    white-space:nowrap; cursor:pointer; user-select:none;
+  }
+  thead th:hover{ color: var(--amber); }
+  tbody td{
+    padding: 11px 14px; font-size:13px; border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background: rgba(255,255,255,0.02); }
+  td.num, th.num{ font-family:'IBM Plex Mono', monospace; text-align:right; }
+  .estado-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12px; font-weight:600; padding:4px 10px; border-radius:20px;
+  }
+  .estado-pill .dot{ width:8px; height:8px; border-radius:50%; }
+  .estado-pill.green{ background: rgba(61,220,132,0.12); color: var(--verde); }
+  .estado-pill.green .dot{ background: var(--verde); }
+  .estado-pill.yellow{ background: rgba(245,194,66,0.12); color: var(--amarillo); }
+  .estado-pill.yellow .dot{ background: var(--amarillo); }
+  .estado-pill.orange{ background: rgba(242,136,75,0.12); color: var(--naranja); }
+  .estado-pill.orange .dot{ background: var(--naranja); }
+  .estado-pill.red{ background: rgba(242,73,92,0.12); color: var(--rojo); }
+  .estado-pill.red .dot{ background: var(--rojo); }
+  .estado-pill.gray{ background: rgba(107,114,128,0.12); color: var(--gris); }
+  .estado-pill.gray .dot{ background: var(--gris); }
+  .cohorte-nueva{ color: var(--amber); font-size:11px; font-weight:600; }
+
+  .empty-state{
+    text-align:center; padding: 60px 20px; color: var(--text-dim);
+  }
+  footer{
+    text-align:center; color: var(--text-dim); font-size:12px; margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="brand-eyebrow"><span class="rec-dot"></span>Retorna · Growth · Paid Media</div>
+      <h1>Monitoreo de Creativos</h1>
+    </div>
+    <div class="meta-right">
+      Última actualización<br>
+      <span id="fecha-gen">—</span>
+    </div>
+  </header>
+
+  <div class="board" id="board"></div>
+
+  <div class="kpi-strip" id="kpi-strip"></div>
+
+  <div class="section-title">🏆 Top ganadores <span class="tag">CPI vs ref más bajo</span></div>
+  <div class="two-col">
+    <div class="list-card" id="ganadores"></div>
+
+    <div>
+      <div class="section-title" style="margin-top:0;">🔻 Top para apagar <span class="tag">CPI vs ref más alto</span></div>
+      <div class="list-card" id="perdedores"></div>
+    </div>
+  </div>
+
+  <div class="section-title">📋 Todas las piezas</div>
+  <div class="filters">
+    <select id="f-ruta"><option value="">Todas las rutas</option></select>
+    <select id="f-conjunto"><option value="">Todos los conjuntos</option></select>
+    <select id="f-estado"><option value="">Todos los estados</option></select>
+    <input type="text" id="f-search" placeholder="Buscar Pieza ID o Ángulo…">
+  </div>
+
+  <div class="table-wrap">
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th data-key="pieza_id">Pieza ID</th>
+          <th data-key="ruta">Ruta</th>
+          <th data-key="conjunto">Conjunto</th>
+          <th data-key="formato">Formato</th>
+          <th data-key="angulo">Ángulo</th>
+          <th data-key="dias_en_test" class="num">Días</th>
+          <th data-key="gasto" class="num">Gasto</th>
+          <th data-key="installs" class="num">Installs</th>
+          <th data-key="cpi" class="num">CPI</th>
+          <th data-key="cpi_vs_ref" class="num">vs ref</th>
+          <th data-key="hook" class="num">Hook %</th>
+          <th data-key="estado_categoria">Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty-state" id="empty-state" style="display:none;">Sin resultados con esos filtros.</div>
+  </div>
+
+  <footer>Dashboard generado desde Monitoreo_Creativos_Meta.xlsx · datos hasta la fecha de arriba · fuente de verdad: Google Sheet interno</footer>
+</div>
+
+<script>
+let DATA = null;
+let sortKey = 'gasto';
+let sortDir = -1;
+
+const fmtMoney = v => v == null ? '—' : '$' + Number(v).toLocaleString('es-CL', {maximumFractionDigits:0});
+const fmtNum = v => v == null ? '—' : Number(v).toLocaleString('es-CL');
+const fmtDec = v => v == null ? '—' : Number(v).toFixed(2);
+const fmtPct = v => v == null ? '—' : (v > 0 ? '+' : '') + Number(v).toFixed(1) + '%';
+
+function renderBoard(resumen){
+  const cats = [
+    {key:'escalar', label:'Escalar', color:'green'},
+    {key:'mantener', label:'Mantener', color:'yellow'},
+    {key:'iterar', label:'Iterar', color:'orange'},
+    {key:'apagar', label:'Apagar', color:'red'},
+  ];
+  document.getElementById('board').innerHTML = cats.map(c => `
+    <div class="lamp-card c-${c.color}">
+      <div class="lamp-top"><div class="lamp"></div><div class="lamp-label">${c.label}</div></div>
+      <div class="lamp-count">${resumen[c.key] || 0}</div>
+      <div class="lamp-sub">piezas activas</div>
+    </div>
+  `).join('');
+}
+
+function renderKPIs(d){
+  const kpis = [
+    {label:'Piezas monitoreadas', value: fmtNum(d.total_piezas)},
+    {label:'Gasto total', value: fmtMoney(d.gasto_total)},
+    {label:'Installs totales', value: fmtNum(d.installs_total)},
+    {label:'Nuevas del Q', value: fmtNum(d.nuevas_q)},
+  ];
+  document.getElementById('kpi-strip').innerHTML = kpis.map(k => `
+    <div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div></div>
+  `).join('');
+}
+
+function renderList(containerId, items, isWinner){
+  const el = document.getElementById(containerId);
+  if(!items || !items.length){
+    el.innerHTML = '<div class="list-row"><span class="pid" style="color:var(--text-dim)">Sin datos suficientes todavía.</span></div>';
+    return;
+  }
+  el.innerHTML = items.map(p => `
+    <div class="list-row">
+      <div><span class="pid">${p.pieza_id || '—'}</span><span class="ruta-badge">${p.ruta || ''}</span></div>
+      <div class="delta ${isWinner ? 'neg' : 'pos'}">${fmtPct(p.cpi_vs_ref)}</div>
+    </div>
+  `).join('');
+}
+
+function populateFilters(piezas){
+  const rutas = [...new Set(piezas.map(p => p.ruta).filter(Boolean))].sort();
+  const conjuntos = [...new Set(piezas.map(p => p.conjunto).filter(Boolean))].sort();
+  const estados = [...new Set(piezas.map(p => p.estado_categoria).filter(Boolean))];
+  const estadoLabels = {escalar:'Escalar', mantener:'Mantener', iterar:'Iterar', apagar:'Apagar', sin_dato:'Sin dato', otro:'Otro'};
+
+  const fRuta = document.getElementById('f-ruta');
+  rutas.forEach(r => fRuta.insertAdjacentHTML('beforeend', `<option value="${r}">${r}</option>`));
+
+  const fConjunto = document.getElementById('f-conjunto');
+  conjuntos.forEach(c => fConjunto.insertAdjacentHTML('beforeend', `<option value="${c}">${c}</option>`));
+
+  const fEstado = document.getElementById('f-estado');
+  estados.forEach(e => fEstado.insertAdjacentHTML('beforeend', `<option value="${e}">${estadoLabels[e] || e}</option>`));
+}
+
+function applyFiltersAndRender(){
+  let rows = [...DATA.piezas];
+  const ruta = document.getElementById('f-ruta').value;
+  const conjunto = document.getElementById('f-conjunto').value;
+  const estado = document.getElementById('f-estado').value;
+  const search = document.getElementById('f-search').value.trim().toLowerCase();
+
+  if(ruta) rows = rows.filter(p => p.ruta === ruta);
+  if(conjunto) rows = rows.filter(p => p.conjunto === conjunto);
+  if(estado) rows = rows.filter(p => p.estado_categoria === estado);
+  if(search) rows = rows.filter(p =>
+    (p.pieza_id||'').toLowerCase().includes(search) ||
+    (p.angulo||'').toLowerCase().includes(search)
+  );
+
+  rows.sort((a,b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if(va == null) va = sortDir === 1 ? Infinity : -Infinity;
+    if(vb == null) vb = sortDir === 1 ? Infinity : -Infinity;
+    if(typeof va === 'string') return sortDir * va.localeCompare(vb);
+    return sortDir * (va - vb);
+  });
+
+  const tbody = document.getElementById('tbody');
+  const emptyState = document.getElementById('empty-state');
+  if(!rows.length){
+    tbody.innerHTML = '';
+    emptyState.style.display = 'block';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  tbody.innerHTML = rows.map(p => `
+    <tr>
+      <td>${p.pieza_id || '—'}${p.cohorte && p.cohorte.toString().includes('🆕') ? ' <span class="cohorte-nueva">🆕</span>' : ''}</td>
+      <td>${p.ruta || '—'}</td>
+      <td>${p.conjunto || '—'}</td>
+      <td>${p.formato || '—'}</td>
+      <td>${p.angulo || '—'}</td>
+      <td class="num">${fmtNum(p.dias_en_test)}</td>
+      <td class="num">${fmtMoney(p.gasto)}</td>
+      <td class="num">${fmtNum(p.installs)}</td>
+      <td class="num">${fmtDec(p.cpi)}</td>
+      <td class="num">${fmtPct(p.cpi_vs_ref)}</td>
+      <td class="num">${p.hook != null ? fmtDec(p.hook)+'%' : '—'}</td>
+      <td><span class="estado-pill ${p.estado_color || 'gray'}"><span class="dot"></span>${p.estado_label || '—'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function init(d){
+  DATA = d;
+  document.getElementById('fecha-gen').textContent = d.generado || '—';
+  renderBoard(d.resumen || {});
+  renderKPIs(d);
+  renderList('ganadores', d.ganadores, true);
+  renderList('perdedores', d.perdedores, false);
+  populateFilters(d.piezas || []);
+  applyFiltersAndRender();
+
+  ['f-ruta','f-conjunto','f-estado'].forEach(id =>
+    document.getElementById(id).addEventListener('change', applyFiltersAndRender));
+  document.getElementById('f-search').addEventListener('input', applyFiltersAndRender);
+
+  document.querySelectorAll('thead th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if(sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+      applyFiltersAndRender();
+    });
+  });
+}
+
+fetch('data.json')
+  .then(r => {
+    if(!r.ok) throw new Error('no data.json');
+    return r.json();
+  })
+  .then(init)
+  .catch(err => {
+    document.getElementById('board').innerHTML =
+      '<div class="empty-state" style="grid-column: 1/-1;">No encontré data.json todavía. Corre export_dashboard.py y sube el archivo junto a este index.html.</div>';
+    console.error(err);
+  });
+</script>
+</body>
+</html>
